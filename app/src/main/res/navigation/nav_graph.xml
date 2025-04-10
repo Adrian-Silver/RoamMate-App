@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/navigation_explore">
 
     <fragment
         android:id="@+id/navigation_explore"
         android:name="com.example.roammate.ExploreFragment"
-        android:label="Explore" />
+        android:label="Explore"
+        tools:layout="@layout/fragment_explore"/>
 
     <fragment
         android:id="@+id/navigation_saved"
         android:name="com.example.roammate.SavedFragment"
-        android:label="Saved" />
+        android:label="Saved"
+        tools:layout="@layout/fragment_saved"/>
+
+    <fragment
+        android:id="@+id/navigation_search"
+        android:name="com.example.roammate.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search"/>
 
 
 </navigation>
