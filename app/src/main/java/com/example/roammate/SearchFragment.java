@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import android.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
@@ -14,8 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.Toolbar;
-
+import androidx.appcompat.widget.Toolbar;
 import com.example.roammate.adapters.SearchPagerAdapter;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -24,7 +24,8 @@ import com.google.android.material.tabs.TabLayoutMediator;
 public class SearchFragment extends Fragment {
 
     private Toolbar toolbar;
-    private EditText searchEditText;
+//    private EditText searchEditText;
+    private SearchView searchView;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private SearchPagerAdapter searchPagerAdapter;
@@ -44,7 +45,7 @@ public class SearchFragment extends Fragment {
 
         // Initialize views
         toolbar = root.findViewById(R.id.toolbar);
-        searchEditText = root.findViewById(R.id.search_edit_text);
+        searchView = root.findViewById(R.id.search_edit_text);
         tabLayout = root.findViewById(R.id.tab_layout);
         viewPager = root.findViewById(R.id.view_pager);
 
@@ -53,8 +54,8 @@ public class SearchFragment extends Fragment {
             Navigation.findNavController(v).navigateUp();
         });
 
-        // Set up search EditText
-        setupSearchEditText();
+        // Set up search SearchView
+        setupSearchView();
 
         // Set up ViewPager with TabLayout
         setupViewPagerWithTabs();
@@ -62,16 +63,27 @@ public class SearchFragment extends Fragment {
         return root;
     }
 
-    private void setupSearchEditText() {
-        // Handle search action
-        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH
-                    || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
-                performSearch(searchEditText.getText().toString());
+    private void setupSearchView() {
+        // Configuration
+        searchView.setIconifiedByDefault(false);
+        searchView.setSubmitButtonEnabled(true);
+        searchView.requestFocus();
+
+        // Query Listener
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                performSearch(query);
                 return true;
             }
-            return false;
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // TODO: Optionally implement real-time search suggestions
+                return false;
+            }
         });
+
     }
 
     private void setupViewPagerWithTabs() {
@@ -124,7 +136,8 @@ public class SearchFragment extends Fragment {
 
         // Pass search query to all tabs
         for (int i = 0; i < searchPagerAdapter.getItemCount(); i++) {
-            Fragment fragment = getChildFragmentManager().findFragmentByTag("f" + i);
+//            Fragment fragment = getChildFragmentManager().findFragmentByTag("f" + i);
+            Fragment fragment = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
             if (fragment instanceof SearchResultsFragment) {
                 ((SearchResultsFragment) fragment).performSearch(query);
             }

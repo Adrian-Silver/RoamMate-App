@@ -14,8 +14,7 @@
            android:id="@+id/app_bar_layout"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
-           android:background="@android:color/white"
-           android:fitsSystemWindows="true">
+           android:fitsSystemWindows="false">
 
            <androidx.appcompat.widget.Toolbar
                android:id="@+id/toolbar"
@@ -25,34 +24,78 @@
                app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel">
 
                <!-- Search EditText -->
-               <EditText
-                   android:id="@+id/search_edit_text"
+<!--               <EditText-->
+<!--                   android:id="@+id/search_edit_text"-->
+<!--                   android:layout_width="match_parent"-->
+<!--                   android:layout_height="36dp"-->
+<!--                   android:background="@android:drawable/editbox_background"-->
+<!--                   android:hint="Search destinations"-->
+<!--                   android:imeOptions="actionSearch"-->
+<!--                   android:inputType="text"-->
+<!--                   android:paddingStart="8dp"-->
+<!--                   android:paddingEnd="8dp"-->
+<!--                   android:textSize="16sp" />-->
+
+               <!-- Search Bar -->
+               <androidx.cardview.widget.CardView
+                   android:id="@+id/search_bar"
                    android:layout_width="match_parent"
-                   android:layout_height="36dp"
-                   android:background="@android:drawable/editbox_background"
-                   android:hint="Search destinations"
-                   android:imeOptions="actionSearch"
-                   android:inputType="text"
-                   android:paddingStart="8dp"
-                   android:paddingEnd="8dp"
-                   android:textSize="16sp" />
+                   android:layout_height="48dp"
+                   android:layout_marginEnd="8dp"
+                   app:cardCornerRadius="8dp"
+                   app:cardElevation="0dp">
 
-           </androidx.appcompat.widget.Toolbar>
+<!--                   <LinearLayout-->
+<!--                       android:layout_width="match_parent"-->
+<!--                       android:layout_height="match_parent"-->
+<!--                       android:gravity="center_vertical"-->
+<!--                       android:orientation="horizontal"-->
+<!--                       android:padding="8dp">-->
 
-           <com.google.android.material.tabs.TabLayout
-               android:id="@+id/tab_layout"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               app:tabGravity="fill"
-               app:tabMode="fixed" />
+<!--                       <ImageView-->
+<!--                           android:layout_width="24dp"-->
+<!--                           android:layout_height="24dp"-->
+<!--                           android:layout_marginStart="8dp"-->
+<!--                           android:src="@android:drawable/ic_menu_search" />-->
 
-       </com.google.android.material.appbar.AppBarLayout>
+<!--                       <EditText-->
+<!--                           android:id="@+id/search_edit_text"-->
+<!--                           android:layout_width="match_parent"-->
+<!--                           android:layout_height="wrap_content"-->
+<!--                           android:layout_marginStart="16dp"-->
+<!--                           android:text="Search destinations"-->
+<!--                           android:textColor="@android:color/darker_gray"-->
+<!--                           android:textSize="16sp" />-->
 
-       <androidx.viewpager2.widget.ViewPager2
-           android:id="@+id/view_pager"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-   </androidx.coordinatorlayout.widget.CoordinatorLayout>
+                       <SearchView
+                           android:id="@+id/search_edit_text"
+                           android:layout_width="match_parent"
+                           android:layout_height="match_parent"
+                           android:iconifiedByDefault="false"
+                           android:queryHint="Search destinations"
+                           android:textColor="@android:color/darker_gray"
+                           android:textSize="16sp" />
 
-</FrameLayout>
+<!--                                          </LinearLayout>-->
+
+                                      </androidx.cardview.widget.CardView>
+
+                                  </androidx.appcompat.widget.Toolbar>
+
+                                  <com.google.android.material.tabs.TabLayout
+                                      android:id="@+id/tab_layout"
+                                      android:layout_width="match_parent"
+                                      android:layout_height="wrap_content"
+                                      app:tabGravity="fill"
+                                      app:tabMode="fixed" />
+
+                              </com.google.android.material.appbar.AppBarLayout>
+
+                              <androidx.viewpager2.widget.ViewPager2
+                                  android:id="@+id/view_pager"
+                                  android:layout_width="match_parent"
+                                  android:layout_height="match_parent"
+                                  app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+                          </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+                       </FrameLayout>
