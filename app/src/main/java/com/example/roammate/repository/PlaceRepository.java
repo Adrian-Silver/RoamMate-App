@@ -1,0 +1,298 @@
+package com.example.roammate.repository;
+
+import android.app.Application;
+import android.util.Log;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import com.example.roammate.data.api.ApiClient;
+import com.example.roammate.data.api.GeoapifyService;
+import com.example.roammate.data.AppDatabase;
+import com.example.roammate.data.PlaceDao;
+import com.example.roammate.data.SavedPlaceEntity;
+import com.example.roammate.data.model.GeoapifyResponse;
+import com.example.roammate.data.model.Place;
+import com.example.roammate.data.model.Feature;
+import com.example.roammate.util.Resource;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+/**
+ * Repository class - works with local and remote data sources
+ */
+public class PlaceRepository {
+    private static final String TAG = "PlaceRepository";
+
+    private final PlaceDao placeDao;
+    private final GeoapifyService apiService;
+    private final String apiKey;
+
+    /**
+     * Constructor
+     */
+    public PlaceRepository(Application application) {
+        AppDatabase db = AppDatabase.getDatabase(application);
+        placeDao = db.placeDao();
+        apiService = ApiClient.getClient().create(GeoapifyService.class);
+        apiKey = ApiClient.getApiKey();
+    }
+
+    /**
+     * Get places by location and category
+     */
+    public LiveData<Resource<List<Place>>> getPlacesByLocation(String placeId, String categories, int limit) {
+        MutableLiveData<Resource<List<Place>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+
+        // Create the filter parameter for the API call
+        String filter = "place:" + placeId;
+
+        // Make the API call
+        apiService.searchPlaces(categories, filter, limit, apiKey)
+                .enqueue(new Callback<GeoapifyResponse>() {
+                    @Override
+                    public void onResponse(Call<GeoapifyResponse> call, Response<GeoapifyResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Place> places = convertFeaturesToPlaces(response.body().getFeatures());
+                            result.postValue(Resource.success(places));
+                        } else {
+                            result.postValue(Resource.error(
+                                    "Error code: " + response.code(), null));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GeoapifyResponse> call, Throwable t) {
+                        result.postValue(Resource.error(t.getMessage(), null));
+                        Log.e(TAG, "API call failed", t);
+                    }
+                });
+
+        return result;
+    }
+
+    /**
+     * Search for places based on coordinates (nearby search)
+     */
+    public LiveData<Resource<List<Place>>> searchNearby(double lat, double lon, String categories, int limit) {
+        MutableLiveData<Resource<List<Place>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+
+        // Create the proximity bias parameter
+        String bias = "proximity:" + lon + "," + lat;
+
+        // Make the API call
+        apiService.searchNearby(categories, bias, limit, apiKey)
+                .enqueue(new Callback<GeoapifyResponse>() {
+                    @Override
+                    public void onResponse(Call<GeoapifyResponse> call, Response<GeoapifyResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Place> places = convertFeaturesToPlaces(response.body().getFeatures());
+                            result.postValue(Resource.success(places));
+                        } else {
+                            result.postValue(Resource.error(
+                                    "Error code: " + response.code(), null));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GeoapifyResponse> call, Throwable t) {
+                        result.postValue(Resource.error(t.getMessage(), null));
+                        Log.e(TAG, "API call failed", t);
+                    }
+                });
+
+        return result;
+    }
+
+    /**
+     * Get place suggestions based on text input
+     */
+    public LiveData<Resource<List<Place>>> getPlaceSuggestions(String query) {
+        MutableLiveData<Resource<List<Place>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+
+        // Make the API call
+        apiService.getPlaceSuggestions(query, 5, apiKey)
+                .enqueue(new Callback<GeoapifyResponse>() {
+                    @Override
+                    public void onResponse(Call<GeoapifyResponse> call, Response<GeoapifyResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Place> places = convertFeaturesToPlaces(response.body().getFeatures());
+                            result.postValue(Resource.success(places));
+                        } else {
+                            result.postValue(Resource.error(
+                                    "Error code: " + response.code(), null));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GeoapifyResponse> call, Throwable t) {
+                        result.postValue(Resource.error(t.getMessage(), null));
+                        Log.e(TAG, "API call failed", t);
+                    }
+                });
+
+        return result;
+    }
+
+    /**
+     * Get details for a specific place
+     */
+    public LiveData<Resource<Place>> getPlaceDetails(String placeId) {
+        MutableLiveData<Resource<Place>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+
+        // First check if the place is in the database
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            int count = placeDao.isPlaceSaved(placeId);
+            if (count > 0) {
+                // Place is saved, get it from the database
+                LiveData<SavedPlaceEntity> dbPlace = placeDao.getPlaceById(placeId);
+                // Observe the LiveData from a background thread
+                // This is a workaround as we can't directly get the value from LiveData
+                // In a real app, you might want to use a different approach
+                try {
+                    Thread.sleep(100); // Wait for LiveData to be ready
+                    // This is just for demonstration, not ideal for production
+                    if (dbPlace.getValue() != null) {
+                        result.postValue(Resource.success(convertEntityToPlace(dbPlace.getValue())));
+                        return;
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+            // If not in database or couldn't get it, fetch from API
+            apiService.getPlaceDetails(placeId, apiKey)
+                    .enqueue(new Callback<GeoapifyResponse>() {
+                        @Override
+                        public void onResponse(Call<GeoapifyResponse> call, Response<GeoapifyResponse> response) {
+                            if (response.isSuccessful() && response.body() != null &&
+                                    !response.body().getFeatures().isEmpty()) {
+                                Place place = new Place(response.body().getFeatures().get(0));
+                                result.postValue(Resource.success(place));
+                            } else {
+                                result.postValue(Resource.error(
+                                        "Error code: " + response.code(), null));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<GeoapifyResponse> call, Throwable t) {
+                            result.postValue(Resource.error(t.getMessage(), null));
+                            Log.e(TAG, "API call failed", t);
+                        }
+                    });
+        });
+
+        return result;
+    }
+
+    /**
+     * Save a place to the database
+     */
+    public void savePlace(Place place) {
+        SavedPlaceEntity entity = convertPlaceToEntity(place);
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            placeDao.insertPlace(entity);
+        });
+    }
+
+    /**
+     * Remove a place from saved places
+     */
+    public void removePlace(String placeId) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            placeDao.deletePlaceById(placeId);
+        });
+    }
+
+    /**
+     * Check if a place is saved
+     */
+    public LiveData<Boolean> isPlaceSaved(String placeId) {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            int count = placeDao.isPlaceSaved(placeId);
+            result.postValue(count > 0);
+        });
+
+        return result;
+    }
+
+    /**
+     * Get all saved places
+     */
+    public LiveData<List<SavedPlaceEntity>> getAllSavedPlaces() {
+        return placeDao.getAllSavedPlaces();
+    }
+
+    /**
+     * Get saved places by category
+     */
+    public LiveData<List<SavedPlaceEntity>> getSavedPlacesByCategory(String category) {
+        return placeDao.getPlacesByCategory(category);
+    }
+
+    // Helper methods
+
+    /**
+     * Convert a list of Feature objects to a list of Place objects
+     */
+    private List<Place> convertFeaturesToPlaces(List<Feature> features) {
+        List<Place> places = new ArrayList<>();
+        for (Feature feature : features) {
+            places.add(new Place(feature));
+        }
+        return places;
+    }
+
+    /**
+     * Convert a Place object to a SavedPlaceEntity
+     */
+    private SavedPlaceEntity convertPlaceToEntity(Place place) {
+        return new SavedPlaceEntity(
+                place.getPlaceId(),
+                place.getName(),
+                place.getCategory(),
+                place.getAddress(),
+                place.getLatitude(),
+                place.getLongitude(),
+                place.getImageUrl(),
+                place.getRating(),
+                place.getCity(),
+                place.getCountry(),
+                place.getWebsite(),
+                place.getPhone(),
+                place.getFormattedAddress()
+        );
+    }
+
+    /**
+     * Convert a SavedPlaceEntity to a Place object
+     */
+    private Place convertEntityToPlace(SavedPlaceEntity entity) {
+        Place place = new Place(
+                entity.getPlaceId(),
+                entity.getName(),
+                entity.getCategory(),
+                entity.getAddress(),
+                entity.getLatitude(),
+                entity.getLongitude(),
+                entity.getImageUrl(),
+                entity.getRating(),
+                true, // It's saved
+                entity.getPlaceId()
+        );
+        return place;
+    }
+}
