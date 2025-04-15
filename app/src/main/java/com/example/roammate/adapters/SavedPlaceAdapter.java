@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.roammate.R;
 import com.example.roammate.data.SavedPlaceEntity;
+import com.example.roammate.util.CategoryImageProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -198,18 +199,26 @@ public class SavedPlaceAdapter extends RecyclerView.Adapter<SavedPlaceAdapter.Sa
         // For saved places, no distance is shown
         holder.placeDistance.setVisibility(View.GONE);
 
-        // Load image with Glide
-        if (place.getImageUrl() != null && !place.getImageUrl().isEmpty()) {
-            Glide.with(context)
-                    .load(place.getImageUrl())
-                    .placeholder(R.drawable.ic_placeholder_image)
-                    .error(R.drawable.ic_placeholder_image)
-                    .into(holder.placeImage);
-        } else {
-            // Use a category-based placeholder if no image
-            int placeholderResId = getCategoryPlaceholder(place.getCategory());
-            holder.placeImage.setImageResource(placeholderResId);
-        }
+//        // Load image with Glide
+//        if (place.getImageUrl() != null && !place.getImageUrl().isEmpty()) {
+//            Glide.with(context)
+//                    .load(place.getImageUrl())
+//                    .placeholder(R.drawable.ic_placeholder_image)
+//                    .error(R.drawable.ic_placeholder_image)
+//                    .into(holder.placeImage);
+//        } else {
+//            // Use a category-based placeholder if no image
+//            int placeholderResId = getCategoryPlaceholder(place.getCategory());
+//            holder.placeImage.setImageResource(placeholderResId);
+//        }
+
+        // Load image - use CategoryImageProvider to get a consistent image
+        int imageResId = CategoryImageProvider.getConsistentImageForPlace(
+                place.getPlaceId(), place.getCategory());
+
+        Glide.with(context)
+                .load(imageResId)
+                .into(holder.placeImage);
 
         // Set favorite button to "remove" state
         holder.favoriteButton.setImageResource(android.R.drawable.btn_star_big_on);
@@ -285,24 +294,24 @@ public class SavedPlaceAdapter extends RecyclerView.Adapter<SavedPlaceAdapter.Sa
         return category;
     }
 
-    /**
-     * Get placeholder image based on category
-     */
-    private int getCategoryPlaceholder(String category) {
-        if (category == null) {
-            return R.drawable.ic_placeholder_image;
-        }
-
-        if (category.contains("hotel") || category.contains("accommodation")) {
-            return R.drawable.ic_hotel_placeholder;
-        } else if (category.contains("restaurant") || category.contains("food") || category.contains("catering")) {
-            return R.drawable.ic_restaurant_placeholder;
-        } else if (category.contains("attraction") || category.contains("tourism")) {
-            return R.drawable.ic_attraction_placeholder;
-        } else {
-            return R.drawable.ic_placeholder_image;
-        }
-    }
+//    /**
+//     * Get placeholder image based on category
+//     */
+//    private int getCategoryPlaceholder(String category) {
+//        if (category == null) {
+//            return R.drawable.ic_placeholder_image;
+//        }
+//
+//        if (category.contains("hotel") || category.contains("accommodation")) {
+//            return R.drawable.ic_hotel_placeholder;
+//        } else if (category.contains("restaurant") || category.contains("food") || category.contains("catering")) {
+//            return R.drawable.ic_restaurant_placeholder;
+//        } else if (category.contains("attraction") || category.contains("tourism")) {
+//            return R.drawable.ic_attraction_placeholder;
+//        } else {
+//            return R.drawable.ic_placeholder_image;
+//        }
+//    }
 
     /**
      * ViewHolder class

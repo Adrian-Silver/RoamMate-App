@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.example.roammate.R;
 //import com.example.roammate.SearchResultsFragment.SearchResult;
 import com.example.roammate.data.model.Place;
+import com.example.roammate.util.CategoryImageProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,17 +155,25 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         holder.placeRating.setRating(place.getRating());
         holder.placeDistance.setText(place.getDistanceText());
 
-        // Load image with Glide
-        if (place.getImageUrl() != null && !place.getImageUrl().isEmpty()) {
-            Glide.with(context)
-                    .load(place.getImageUrl())
-                    .placeholder(R.drawable.ic_placeholder_image)
-                    .error(R.drawable.ic_placeholder_image)
-                    .into(holder.placeImage);
-        } else {
-            // Set a default placeholder
-            holder.placeImage.setImageResource(R.drawable.ic_placeholder_image);
-        }
+//        // Load image with Glide
+//        if (place.getImageUrl() != null && !place.getImageUrl().isEmpty()) {
+//            Glide.with(context)
+//                    .load(place.getImageUrl())
+//                    .placeholder(R.drawable.ic_placeholder_image)
+//                    .error(R.drawable.ic_placeholder_image)
+//                    .into(holder.placeImage);
+//        } else {
+//            // Set a default placeholder
+//            holder.placeImage.setImageResource(R.drawable.ic_placeholder_image);
+//        }
+
+        // Use CategoryImageProvider to get a consistent image for each place
+        int imageResId = CategoryImageProvider.getConsistentImageForPlace(
+                place.getPlaceId(), place.getCategory());
+
+        Glide.with(context)
+                .load(imageResId)
+                .into(holder.placeImage);
 
         // Set favorite button state
         holder.favoriteButton.setSelected(place.isSaved());
