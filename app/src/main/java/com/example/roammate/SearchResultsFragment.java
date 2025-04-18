@@ -1,5 +1,6 @@
 package com.example.roammate;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -343,6 +344,11 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
         // Bundle args = new Bundle();
         // args.putString("placeId", place.getPlaceId());
         // Navigation.findNavController(getView()).navigate(R.id.action_to_place_details, args);
+
+        // Navigate to place details
+        Intent intent = new Intent(getActivity(), PlaceDetailsActivity.class);
+        intent.putExtra(PlaceDetailsActivity.EXTRA_PLACE_ID, place.getPlaceId());
+        startActivity(intent);
     }
 
     // PlaceAdapter.OnPlaceSaveListener implementation

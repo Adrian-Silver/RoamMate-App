@@ -81,6 +81,9 @@ public class Properties {
     @SerializedName("catering")
     private Map<String, Object> catering;
 
+    @SerializedName("raw")
+    private Map<String, Object> raw;
+
     // Nested Datasource class
     public static class Datasource {
         @SerializedName("sourcename")
@@ -212,5 +215,9 @@ public class Properties {
 
     public Map<String, Object> getCatering() {
         return catering;
+    }
+
+    public Map<String, Object> getRaw() {
+        return raw;
     }
 }

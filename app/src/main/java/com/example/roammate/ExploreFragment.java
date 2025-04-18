@@ -2,6 +2,7 @@ package com.example.roammate;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -408,6 +409,11 @@ public class ExploreFragment extends Fragment implements PlaceAdapter.OnPlaceCli
         // Bundle args = new Bundle();
         // args.putString("placeId", place.getPlaceId());
         // Navigation.findNavController(getView()).navigate(R.id.action_to_place_details, args);
+
+        // Navigate to place details
+        Intent intent = new Intent(getActivity(), PlaceDetailsActivity.class);
+        intent.putExtra(PlaceDetailsActivity.EXTRA_PLACE_ID, place.getPlaceId());
+        startActivity(intent);
     }
 
     // PlaceAdapter.OnPlaceSaveListener implementation

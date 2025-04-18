@@ -1,5 +1,6 @@
 package com.example.roammate;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -229,6 +230,11 @@ public class SavedFragment extends Fragment {
                 // Navigate to place details
                 Toast.makeText(getContext(), "Viewing " + place.getName(), Toast.LENGTH_SHORT).show();
                 // Navigation implementation will be added later
+
+                // Navigate to place details
+                Intent intent = new Intent(getActivity(), PlaceDetailsActivity.class);
+                intent.putExtra(PlaceDetailsActivity.EXTRA_PLACE_ID, place.getPlaceId());
+                startActivity(intent);
             }
 
             @Override
@@ -243,6 +249,11 @@ public class SavedFragment extends Fragment {
             @Override
             public void onPlaceClick(SavedPlaceEntity place) {
                 Toast.makeText(getContext(), "Viewing " + place.getName(), Toast.LENGTH_SHORT).show();
+
+                // Navigate to place details
+                Intent intent = new Intent(getActivity(), PlaceDetailsActivity.class);
+                intent.putExtra(PlaceDetailsActivity.EXTRA_PLACE_ID, place.getPlaceId());
+                startActivity(intent);
             }
 
             @Override
@@ -256,6 +267,11 @@ public class SavedFragment extends Fragment {
             @Override
             public void onPlaceClick(SavedPlaceEntity place) {
                 Toast.makeText(getContext(), "Viewing " + place.getName(), Toast.LENGTH_SHORT).show();
+
+                // Navigate to place details
+                Intent intent = new Intent(getActivity(), PlaceDetailsActivity.class);
+                intent.putExtra(PlaceDetailsActivity.EXTRA_PLACE_ID, place.getPlaceId());
+                startActivity(intent);
             }
 
             @Override
@@ -269,6 +285,11 @@ public class SavedFragment extends Fragment {
             @Override
             public void onPlaceClick(SavedPlaceEntity place) {
                 Toast.makeText(getContext(), "Viewing " + place.getName(), Toast.LENGTH_SHORT).show();
+
+                // Navigate to place details
+                Intent intent = new Intent(getActivity(), PlaceDetailsActivity.class);
+                intent.putExtra(PlaceDetailsActivity.EXTRA_PLACE_ID, place.getPlaceId());
+                startActivity(intent);
             }
 
             @Override

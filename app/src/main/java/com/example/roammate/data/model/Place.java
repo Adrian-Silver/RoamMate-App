@@ -1,6 +1,8 @@
 package com.example.roammate.data.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Place {
     private String id;
@@ -22,6 +24,17 @@ public class Place {
     private String city;
     private String country;
 
+    private String fee;
+    private String leisure;
+    private String historic;
+    private Integer stars;
+    private String accommodationType;
+    private String internetAccess;
+    private Map<String, Boolean> paymentOptions;
+    private String cuisine;
+    private Map<String, Object> facilities;
+    private Map<String, Object> raw;
+
     // Constructor for creating a Place object from a Geoapify Feature
     public Place(Feature feature) {
         Properties props = feature.getProperties();
@@ -41,6 +54,7 @@ public class Place {
         this.city = props.getCity();
         this.country = props.getCountry();
         this.isSaved = false;
+        this.raw = props.getRaw();
 
         // Determine primary category from categories list
         if (categories != null && !categories.isEmpty()) {
@@ -55,6 +69,68 @@ public class Place {
 
         // We would get an image URL from another API or use a placeholder
         this.imageUrl = "";
+
+        // Parse category-specific fields
+        if (raw != null) {
+            // For attractions
+            if (raw.containsKey("fee")) {
+                this.fee = raw.get("fee").toString();
+            }
+            if (raw.containsKey("leisure")) {
+                this.leisure = raw.get("leisure").toString();
+            }
+            if (raw.containsKey("historic")) {
+                this.historic = raw.get("historic").toString();
+            }
+
+            // For hotels
+            if (raw.containsKey("stars")) {
+                try {
+                    this.stars = Integer.parseInt(raw.get("stars").toString());
+                } catch (NumberFormatException e) {
+                    this.stars = null;
+                }
+            }
+            if (raw.containsKey("tourism") && "hotel".equals(raw.get("tourism"))) {
+                this.accommodationType = "Hotel";
+            } else if (raw.containsKey("tourism")) {
+                this.accommodationType = raw.get("tourism").toString();
+            }
+            if (raw.containsKey("internet_access")) {
+                this.internetAccess = raw.get("internet_access").toString();
+            }
+
+            // For restaurants
+            if (raw.containsKey("cuisine")) {
+                this.cuisine = raw.get("cuisine").toString();
+            }
+        }
+
+        // Parse facilities from contact, catering, etc.
+        this.facilities = new HashMap<>();
+        if (props.getContact() != null) {
+            this.facilities.putAll(props.getContact());
+        }
+        if (props.getCatering() != null) {
+            this.facilities.putAll(props.getCatering());
+        }
+
+        // Parse payment options
+        this.paymentOptions = new HashMap<>();
+        if (raw != null) {
+            for (Map.Entry<String, Object> entry : raw.entrySet()) {
+                if (entry.getKey().startsWith("payment:")) {
+                    try {
+                        this.paymentOptions.put(
+                                entry.getKey().substring("payment:".length()),
+                                "yes".equals(entry.getValue().toString())
+                        );
+                    } catch (Exception e) {
+                        // Skip if any parsing errors
+                    }
+                }
+            }
+        }
     }
 
     // Constructor for creating a Place from a database entity
@@ -180,6 +256,46 @@ public class Place {
 
     public String getCountry() {
         return country;
+    }
+
+    public String getFee() {
+        return fee;
+    }
+
+    public String getLeisure() {
+        return leisure;
+    }
+
+    public String getHistoric() {
+        return historic;
+    }
+
+    public Integer getStars() {
+        return stars;
+    }
+
+    public String getAccommodationType() {
+        return accommodationType;
+    }
+
+    public String getInternetAccess() {
+        return internetAccess;
+    }
+
+    public Map<String, Boolean> getPaymentOptions() {
+        return paymentOptions;
+    }
+
+    public String getCuisine() {
+        return cuisine;
+    }
+
+    public Map<String, Object> getFacilities() {
+        return facilities;
+    }
+
+    public Map<String, Object> getRaw() {
+        return raw;
     }
 
     // Helper methods

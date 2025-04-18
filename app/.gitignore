@@ -3,3 +3,4 @@
 /src/main/res/drawable/hotel*.jpg
 /src/main/res/drawable/restaurant*.jpg
 /src/main/res/drawable/default_place.jpg
+/src/main/java/com/example/roammate/adapters/PlaceSuggestionAdapter.java
