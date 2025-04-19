@@ -414,14 +414,34 @@ public class PlaceRepository {
                 .enqueue(new Callback<GeoapifyResponse>() {
                     @Override
                     public void onResponse(Call<GeoapifyResponse> call, Response<GeoapifyResponse> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            List<Place> places = convertFeaturesToPlaces(response.body().getFeatures());
-                            result.postValue(Resource.success(places));
-                        } else {
-                            result.postValue(Resource.error(
-                                    "Error code: " + response.code(), null));
+                        try {
+                            if (response.isSuccessful() && response.body() != null) {
+                                if (response.body().getFeatures() != null && !response.body().getFeatures().isEmpty()) {
+                                    List<Place> places = convertFeaturesToPlaces(response.body().getFeatures());
+                                    result.postValue(Resource.success(places));
+                                } else {
+                                    // Successfully got a response but no places found
+                                    result.postValue(Resource.success(new ArrayList<>()));
+                                }
+                            } else {
+                                String errorMsg = "Error code: " + response.code();
+                                try {
+                                    if (response.errorBody() != null) {
+                                        errorMsg += " - " + response.errorBody().string();
+                                    }
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Error reading error body", e);
+                                }
+                                result.postValue(Resource.error(errorMsg, null));
+                            }
+                        } catch (Exception e) {
+                            // Handle any parsing exceptions
+                            Log.e(TAG, "Error parsing POI results", e);
+                            result.postValue(Resource.error("Error parsing results: " + e.getMessage(), null));
                         }
                     }
+
+
 
                     @Override
                     public void onFailure(Call<GeoapifyResponse> call, Throwable t) {

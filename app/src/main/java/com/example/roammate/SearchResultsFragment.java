@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -156,6 +159,283 @@ import java.util.List;
 //    }
 //}
 
+//public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPlaceClickListener, PlaceAdapter.OnPlaceSaveListener {
+//
+//    private RecyclerView recyclerView;
+//    private SwipeRefreshLayout swipeRefreshLayout;
+//    private ProgressBar progressBar;
+//    private TextView emptyView;
+//    private PlaceAdapter adapter;
+//
+//    private PlaceViewModel placeViewModel;
+//
+//    private String category = "all";
+//    private String currentQuery = "";
+//    private String currentPlaceId = null;
+//
+//    // Constructor
+//    public SearchResultsFragment() {
+//        // Required empty constructor
+//    }
+//
+//    /**
+//     * Set the category for this fragment
+//     */
+//    public void setCategory(String category) {
+//        this.category = category;
+//    }
+//
+//    @Nullable
+//    @Override
+//    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+//        View root = inflater.inflate(R.layout.fragment_search_results, container, false);
+//
+//        // Initialize views
+//        recyclerView = root.findViewById(R.id.recycler_view);
+//        swipeRefreshLayout = root.findViewById(R.id.swipe_refresh_layout);
+//        progressBar = root.findViewById(R.id.progress_bar);
+//        emptyView = root.findViewById(R.id.empty_view);
+//
+//        // Initialize ViewModel
+//        placeViewModel = new ViewModelProvider(requireActivity()).get(PlaceViewModel.class);
+//
+//        // Setup RecyclerView
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//        adapter = new PlaceAdapter(getContext(), category);
+//        adapter.setOnPlaceClickListener(this);
+//        adapter.setOnPlaceSaveListener(this);
+//        recyclerView.setAdapter(adapter);
+//
+//        // Setup SwipeRefreshLayout
+//        swipeRefreshLayout.setOnRefreshListener(() -> {
+//            // Refresh results with the same parameters
+//            if (currentPlaceId != null) {
+//                performSearchByPlaceId(currentPlaceId);
+//            }
+////            else if (!currentQuery.isEmpty()) {
+////                performSearchByText(currentQuery);
+////            }
+//            // If there's no place ID set yet, just hide the refresh indicator
+//            else {
+//                swipeRefreshLayout.setRefreshing(false);
+//            }
+//        });
+//
+//        // Set refresh indicator colors
+//        swipeRefreshLayout.setColorSchemeResources(
+//                android.R.color.holo_blue_bright,
+//                android.R.color.holo_green_light,
+//                android.R.color.holo_orange_light,
+//                android.R.color.holo_red_light
+//        );
+//
+//        return root;
+//    }
+//
+//    /**
+//     * Perform search using a place ID
+//     */
+//    public void performSearchByPlaceId(String placeId) {
+//        if (placeId == null || placeId.isEmpty()) {
+//            showEmptyState("Invalid location selected");
+//            return;
+//        }
+//
+//        currentPlaceId = placeId;
+////        currentQuery = "";
+//
+//        // Show loading state
+//        showLoading();
+//
+//        // Determine which API categories to search based on the tab
+//        String apiCategories = getCategoryParam();
+//
+//        // Add a timeout mechanism to handle hanging requests
+//        final Handler timeoutHandler = new Handler(Looper.getMainLooper());
+//        final Runnable timeoutRunnable = () -> {
+//            if (progressBar.getVisibility() == View.VISIBLE) {
+//                // If still loading after timeout, show error
+//                hideLoading();
+//                showEmptyState("Request timed out. Pull down to try again.");
+//            }
+//        };
+//
+//        // Set a 15-second timeout
+//        timeoutHandler.postDelayed(timeoutRunnable, 15000);
+//
+//        // Call the repository method to fetch data
+//        placeViewModel.getPlacesByLocation(placeId, apiCategories, 20)
+////                .observe(getViewLifecycleOwner(), this::processSearchResult);
+//                .observe(getViewLifecycleOwner(), resource -> {
+//                    // Cancel timeout when we get a response
+//                    timeoutHandler.removeCallbacks(timeoutRunnable);
+//
+//                    processSearchResult(resource);
+//                });
+//
+//    }
+//
+//
+//
+////    /**
+////     * Perform search using text query
+////     */
+////    public void performSearchByText(String query) {
+////        if (query.isEmpty()) {
+////            return;
+////        }
+////
+////        currentQuery = query;
+////        currentPlaceId = null;
+////
+////        // Show loading state
+////        showLoading();
+////
+////        // Here we could use a text-based search API
+////        // For simplicity, we'll just show a message that place ID is needed
+////        // In a real app, you would implement a text search here
+////
+////        // Simulate search delay
+////        getView().postDelayed(() -> {
+////            hideLoading();
+////            showEmptyState("Please select a location from the suggestions");
+////            Toast.makeText(getContext(), "Select a location for better results", Toast.LENGTH_SHORT).show();
+////        }, 1000);
+////    }
+//
+////    /**
+////     * Process API response
+////     */
+////    private void processSearchResult(Resource<List<Place>> resource) {
+////        hideLoading();
+////
+////        switch (resource.status) {
+////            case SUCCESS:
+////                if (resource.data != null && !resource.data.isEmpty()) {
+////                    adapter.setPlaces(resource.data);
+////                    showResults();
+////                } else {
+////                    showEmptyState("No places found");
+////                }
+////                break;
+////
+////            case ERROR:
+////                showEmptyState("Error: " + resource.message);
+////                Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_SHORT).show();
+////                break;
+////
+////            case LOADING:
+////                showLoading();
+////                break;
+////        }
+////    }
+//
+//    /**
+//            * Process API response
+//     */
+//    private void processSearchResult(Resource<List<Place>> resource) {
+//        hideLoading();
+//
+//        switch (resource.status) {
+//            case SUCCESS:
+//                if (resource.data != null && !resource.data.isEmpty()) {
+//                    adapter.setPlaces(resource.data);
+//                    showResults();
+//                } else {
+//                    showEmptyState("No places found in this category");
+//                }
+//                break;
+//
+//            case ERROR:
+//                showEmptyState("Error: " + resource.message);
+//                Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_SHORT).show();
+//                Log.e("SearchResults", "Search error: " + resource.message);
+//                break;
+//
+//            case LOADING:
+//                showLoading();
+//                break;
+//        }
+//    }
+//
+//    /**
+//     * Get API category parameter based on the selected tab
+//     */
+//    private String getCategoryParam() {
+//        switch (category) {
+//            case "attractions":
+//                return "tourism.attraction,tourism.sights";
+//            case "hotels":
+//                return "accommodation.hotel,accommodation";
+//            case "restaurants":
+//                return "catering.restaurant,catering";
+//            default: // "all"
+//                return "tourism.attraction,tourism.sights,accommodation.hotel,accommodation,catering.restaurant,catering";
+//        }
+//    }
+//
+//    // UI state methods
+//
+//    private void showLoading() {
+//        progressBar.setVisibility(View.VISIBLE);
+//        recyclerView.setVisibility(View.GONE);
+//        emptyView.setVisibility(View.GONE);
+////        swipeRefreshLayout.setRefreshing(false);
+//    }
+//
+//    private void hideLoading() {
+//        progressBar.setVisibility(View.GONE);
+//        swipeRefreshLayout.setRefreshing(false);
+//    }
+//
+//    private void showResults() {
+//        recyclerView.setVisibility(View.VISIBLE);
+//        emptyView.setVisibility(View.GONE);
+//    }
+//
+//    private void showEmptyState(String message) {
+//        recyclerView.setVisibility(View.GONE);
+//        emptyView.setVisibility(View.VISIBLE);
+//        emptyView.setText(message);
+//        // Make sure the refresh indicator is also hidden
+//        swipeRefreshLayout.setRefreshing(false);
+//
+//    }
+//
+//    // PlaceAdapter.OnPlaceClickListener implementation
+//
+//    @Override
+//    public void onPlaceClick(Place place) {
+//        // Navigate to place details
+//        // In a real app, you would create a details screen and pass the place ID
+//        Toast.makeText(getContext(), "Selected: " + place.getName(), Toast.LENGTH_SHORT).show();
+//
+//        // Example navigation (you would need to create this destination)
+//        // Bundle args = new Bundle();
+//        // args.putString("placeId", place.getPlaceId());
+//        // Navigation.findNavController(getView()).navigate(R.id.action_to_place_details, args);
+//
+//        // Navigate to place details
+//        Intent intent = new Intent(getActivity(), PlaceDetailsActivity.class);
+//        intent.putExtra(PlaceDetailsActivity.EXTRA_PLACE_ID, place.getPlaceId());
+//        startActivity(intent);
+//    }
+//
+//    // PlaceAdapter.OnPlaceSaveListener implementation
+//
+//    @Override
+//    public void onPlaceSave(Place place) {
+//        placeViewModel.savePlace(place);
+//        Toast.makeText(getContext(), place.getName() + " added to favorites", Toast.LENGTH_SHORT).show();
+//    }
+//
+//    @Override
+//    public void onPlaceUnsave(Place place) {
+//        placeViewModel.removePlace(place.getPlaceId());
+//        Toast.makeText(getContext(), place.getName() + " removed from favorites", Toast.LENGTH_SHORT).show();
+//    }
+//}
+
 public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPlaceClickListener, PlaceAdapter.OnPlaceSaveListener {
 
     private RecyclerView recyclerView;
@@ -163,12 +443,13 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
     private ProgressBar progressBar;
     private TextView emptyView;
     private PlaceAdapter adapter;
+    private View rootView;
 
     private PlaceViewModel placeViewModel;
 
     private String category = "all";
-    private String currentQuery = "";
     private String currentPlaceId = null;
+    private boolean isViewInitialized = false;
 
     // Constructor
     public SearchResultsFragment() {
@@ -185,36 +466,81 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_search_results, container, false);
+        rootView = inflater.inflate(R.layout.fragment_search_results, container, false);
 
-        // Initialize views
-        recyclerView = root.findViewById(R.id.recycler_view);
-        swipeRefreshLayout = root.findViewById(R.id.swipe_refresh_layout);
-        progressBar = root.findViewById(R.id.progress_bar);
-        emptyView = root.findViewById(R.id.empty_view);
-
-        // Initialize ViewModel
+        // Initialize view model
         placeViewModel = new ViewModelProvider(requireActivity()).get(PlaceViewModel.class);
 
+        // This ensures we don't try to use views before they're ready
+        isViewInitialized = false;
+
+        return rootView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Initialize views
+        initializeViews();
+
         // Setup RecyclerView
+        setupRecyclerView();
+
+        // Setup SwipeRefreshLayout
+        setupSwipeRefresh();
+
+        // Mark views as initialized
+        isViewInitialized = true;
+
+        // If we already have a place ID, search again
+        if (currentPlaceId != null && !currentPlaceId.isEmpty()) {
+            performSearchByPlaceId(currentPlaceId);
+        }
+    }
+
+    /**
+     * Initialize views
+     */
+    private void initializeViews() {
+        recyclerView = rootView.findViewById(R.id.recycler_view);
+        swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_layout);
+        progressBar = rootView.findViewById(R.id.progress_bar);
+        emptyView = rootView.findViewById(R.id.empty_view);
+    }
+
+    /**
+     * Setup RecyclerView
+     */
+    private void setupRecyclerView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new PlaceAdapter(getContext(), category);
         adapter.setOnPlaceClickListener(this);
         adapter.setOnPlaceSaveListener(this);
         recyclerView.setAdapter(adapter);
+    }
 
-        // Setup SwipeRefreshLayout
+    /**
+     * Setup SwipeRefreshLayout
+     */
+    private void setupSwipeRefresh() {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             // Refresh results with the same parameters
             if (currentPlaceId != null) {
                 performSearchByPlaceId(currentPlaceId);
+            } else {
+                // If there's no place ID set yet, just hide the refresh indicator
+                swipeRefreshLayout.setRefreshing(false);
             }
-//            else if (!currentQuery.isEmpty()) {
-//                performSearchByText(currentQuery);
-//            }
         });
 
-        return root;
+        // Set refresh indicator colors
+        swipeRefreshLayout.setColorSchemeResources(
+                android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light
+        );
     }
 
     /**
@@ -222,11 +548,19 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
      */
     public void performSearchByPlaceId(String placeId) {
         if (placeId == null || placeId.isEmpty()) {
+            Log.e("SearchResults", "Invalid place ID provided");
+            showEmptyStateIfPossible("Invalid location selected");
             return;
         }
 
+        // Save the place ID even if views aren't initialized yet
         currentPlaceId = placeId;
-//        currentQuery = "";
+
+        // If views aren't initialized yet, we'll search when they are
+        if (!isViewInitialized || !isAdded()) {
+            Log.d("SearchResults", "Views not initialized yet, will search later");
+            return;
+        }
 
         // Show loading state
         showLoading();
@@ -234,70 +568,39 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
         // Determine which API categories to search based on the tab
         String apiCategories = getCategoryParam();
 
+        // Add a timeout mechanism to handle hanging requests
+        final Handler timeoutHandler = new Handler(Looper.getMainLooper());
+        final Runnable timeoutRunnable = () -> {
+            if (isAdded() && isViewInitialized && progressBar != null && progressBar.getVisibility() == View.VISIBLE) {
+                // If still loading after timeout, show error
+                hideLoading();
+                showEmptyStateIfPossible("Request timed out. Pull down to try again.");
+            }
+        };
+
+        // Set a 15-second timeout
+        timeoutHandler.postDelayed(timeoutRunnable, 15000);
+
         // Call the repository method to fetch data
-        placeViewModel.getPlacesByLocation(placeId, apiCategories, 20)
-                .observe(getViewLifecycleOwner(), this::processSearchResult);
+        placeViewModel.searchPOIsInPlace(placeId, apiCategories, 20)
+                .observe(getViewLifecycleOwner(), resource -> {
+                    // Cancel timeout when we get a response
+                    timeoutHandler.removeCallbacks(timeoutRunnable);
+
+                    if (isAdded() && isViewInitialized) {
+                        processSearchResult(resource);
+                    }
+                });
     }
 
-
-
-//    /**
-//     * Perform search using text query
-//     */
-//    public void performSearchByText(String query) {
-//        if (query.isEmpty()) {
-//            return;
-//        }
-//
-//        currentQuery = query;
-//        currentPlaceId = null;
-//
-//        // Show loading state
-//        showLoading();
-//
-//        // Here we could use a text-based search API
-//        // For simplicity, we'll just show a message that place ID is needed
-//        // In a real app, you would implement a text search here
-//
-//        // Simulate search delay
-//        getView().postDelayed(() -> {
-//            hideLoading();
-//            showEmptyState("Please select a location from the suggestions");
-//            Toast.makeText(getContext(), "Select a location for better results", Toast.LENGTH_SHORT).show();
-//        }, 1000);
-//    }
-
-//    /**
-//     * Process API response
-//     */
-//    private void processSearchResult(Resource<List<Place>> resource) {
-//        hideLoading();
-//
-//        switch (resource.status) {
-//            case SUCCESS:
-//                if (resource.data != null && !resource.data.isEmpty()) {
-//                    adapter.setPlaces(resource.data);
-//                    showResults();
-//                } else {
-//                    showEmptyState("No places found");
-//                }
-//                break;
-//
-//            case ERROR:
-//                showEmptyState("Error: " + resource.message);
-//                Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_SHORT).show();
-//                break;
-//
-//            case LOADING:
-//                showLoading();
-//                break;
-//        }
-//    }
-
     /**
-            * Process API response
+     * Process API response
      */
     private void processSearchResult(Resource<List<Place>> resource) {
+        if (!isAdded() || !isViewInitialized) {
+            return;
+        }
+
         hideLoading();
 
         switch (resource.status) {
@@ -306,13 +609,17 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
                     adapter.setPlaces(resource.data);
                     showResults();
                 } else {
-                    showEmptyState("No places found in this category");
+                    // Explicitly handle empty results
+                    showEmptyStateIfPossible("No places found in this category");
                 }
                 break;
 
             case ERROR:
-                showEmptyState("Error: " + resource.message);
-                Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_SHORT).show();
+                showEmptyStateIfPossible("Error: " + resource.message);
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_SHORT).show();
+                }
+                Log.e("SearchResults", "Search error: " + resource.message);
                 break;
 
             case LOADING:
@@ -337,43 +644,45 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
         }
     }
 
-    // UI state methods
-
+    // UI state methods with null checks
     private void showLoading() {
-        progressBar.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.GONE);
-        emptyView.setVisibility(View.GONE);
-        swipeRefreshLayout.setRefreshing(false);
+        if (isAdded() && isViewInitialized) {
+            if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+            if (recyclerView != null) recyclerView.setVisibility(View.GONE);
+            if (emptyView != null) emptyView.setVisibility(View.GONE);
+        }
     }
 
     private void hideLoading() {
-        progressBar.setVisibility(View.GONE);
-        swipeRefreshLayout.setRefreshing(false);
+        if (isAdded() && isViewInitialized) {
+            if (progressBar != null) progressBar.setVisibility(View.GONE);
+            if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     private void showResults() {
-        recyclerView.setVisibility(View.VISIBLE);
-        emptyView.setVisibility(View.GONE);
+        if (isAdded() && isViewInitialized) {
+            if (recyclerView != null) recyclerView.setVisibility(View.VISIBLE);
+            if (emptyView != null) emptyView.setVisibility(View.GONE);
+        }
     }
 
-    private void showEmptyState(String message) {
-        recyclerView.setVisibility(View.GONE);
-        emptyView.setVisibility(View.VISIBLE);
-        emptyView.setText(message);
+    private void showEmptyStateIfPossible(String message) {
+        if (isAdded() && isViewInitialized) {
+            if (recyclerView != null) recyclerView.setVisibility(View.GONE);
+            if (emptyView != null) {
+                emptyView.setVisibility(View.VISIBLE);
+                emptyView.setText(message);
+            }
+            // Make sure the refresh indicator is also hidden
+            if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     // PlaceAdapter.OnPlaceClickListener implementation
-
     @Override
     public void onPlaceClick(Place place) {
-        // Navigate to place details
-        // In a real app, you would create a details screen and pass the place ID
-        Toast.makeText(getContext(), "Selected: " + place.getName(), Toast.LENGTH_SHORT).show();
-
-        // Example navigation (you would need to create this destination)
-        // Bundle args = new Bundle();
-        // args.putString("placeId", place.getPlaceId());
-        // Navigation.findNavController(getView()).navigate(R.id.action_to_place_details, args);
+        if (!isAdded()) return;
 
         // Navigate to place details
         Intent intent = new Intent(getActivity(), PlaceDetailsActivity.class);
@@ -382,17 +691,24 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
     }
 
     // PlaceAdapter.OnPlaceSaveListener implementation
-
     @Override
     public void onPlaceSave(Place place) {
+        if (!isAdded() || placeViewModel == null) return;
+
         placeViewModel.savePlace(place);
-        Toast.makeText(getContext(), place.getName() + " added to favorites", Toast.LENGTH_SHORT).show();
+        if (getContext() != null) {
+            Toast.makeText(getContext(), place.getName() + " added to favorites", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void onPlaceUnsave(Place place) {
+        if (!isAdded() || placeViewModel == null) return;
+
         placeViewModel.removePlace(place.getPlaceId());
-        Toast.makeText(getContext(), place.getName() + " removed from favorites", Toast.LENGTH_SHORT).show();
+        if (getContext() != null) {
+            Toast.makeText(getContext(), place.getName() + " removed from favorites", Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

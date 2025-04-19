@@ -5,6 +5,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.SearchView;
@@ -612,21 +614,54 @@ public class SearchFragment extends Fragment implements PlaceNameAdapter.OnPlace
     /**
      * Search for POIs within a selected place
      */
+//    private void searchPOIsInPlace(Place place) {
+//        // Switch to POI search UI
+//        showPOISearchResults(place.getName());
+//
+//        // Get all the tabs and send the place ID to each
+//        String placeId = place.getPlaceId();
+//
+//        // Notify all tabs to search using the place ID
+//        for (int i = 0; i < searchPagerAdapter.getItemCount(); i++) {
+////            SearchResultsFragment fragment = getChildFragmentManager().findFragmentByTag("f" + i);
+////            if (fragment instanceof SearchResultsFragment) {
+////                ((SearchResultsFragment) fragment).performSearchByPlaceId(placeId);
+////            }
+//            SearchResultsFragment fragment = searchPagerAdapter.getFragment(i);
+//            if (fragment != null) {
+//                fragment.performSearchByPlaceId(placeId);
+//            }
+//        }
+//    }
     private void searchPOIsInPlace(Place place) {
+        if (place == null || place.getPlaceId() == null) {
+            Toast.makeText(getContext(), "Invalid place selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Get place ID
+        String placeId = place.getPlaceId();
+
         // Switch to POI search UI
         showPOISearchResults(place.getName());
 
-        // Get all the tabs and send the place ID to each
-        String placeId = place.getPlaceId();
+        // Log for debugging
+        Log.d("SearchFragment", "Searching POIs for place: " + place.getName() + " (ID: " + placeId + ")");
 
-        // Notify all tabs to search using the place ID
-        for (int i = 0; i < searchPagerAdapter.getItemCount(); i++) {
-            Fragment fragment = getChildFragmentManager().findFragmentByTag("f" + i);
-            if (fragment instanceof SearchResultsFragment) {
-                ((SearchResultsFragment) fragment).performSearchByPlaceId(placeId);
+        // Use a slight delay to ensure the ViewPager has completely initialized its fragments
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Notify all tabs to search using the place ID
+            for (int i = 0; i < searchPagerAdapter.getItemCount(); i++) {
+                SearchResultsFragment fragment = searchPagerAdapter.getFragment(i);
+                if (fragment != null) {
+                    fragment.performSearchByPlaceId(placeId);
+                } else {
+                    Log.e("SearchFragment", "Fragment at position " + i + " is null");
+                }
             }
-        }
+        }, 100); // Short delay to let the ViewPager initialize
     }
+
 
     // PlaceNameAdapter.OnPlaceClickListener implementation
     @Override
