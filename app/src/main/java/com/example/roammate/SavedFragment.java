@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -356,26 +357,32 @@ public class SavedFragment extends Fragment {
      * Load saved places from the database
      */
     private void loadSavedPlaces() {
+        Log.d("SavedFragment", "Loading saved places...");
+
         // Load attractions
         savedPlaceViewModel.getSavedPlaces("attraction").observe(getViewLifecycleOwner(), places -> {
+            Log.d("SavedFragment", "Attractions loaded: " + (places != null ? places.size() : 0));
             attractionsAdapter.setPlaces(places);
             updateEmptyView(places, emptyAttractions, attractionsRecyclerView);
         });
 
         // Load hotels
         savedPlaceViewModel.getSavedPlaces("hotel").observe(getViewLifecycleOwner(), places -> {
+            Log.d("SavedFragment", "Hotels loaded: " + (places != null ? places.size() : 0));
             hotelsAdapter.setPlaces(places);
             updateEmptyView(places, emptyHotels, hotelsRecyclerView);
         });
 
         // Load restaurants
         savedPlaceViewModel.getSavedPlaces("restaurant").observe(getViewLifecycleOwner(), places -> {
+            Log.d("SavedFragment", "Restaurants loaded: " + (places != null ? places.size() : 0));
             restaurantsAdapter.setPlaces(places);
             updateEmptyView(places, emptyRestaurants, restaurantsRecyclerView);
         });
 
         // Load tips
         savedPlaceViewModel.getSavedPlaces("tip").observe(getViewLifecycleOwner(), places -> {
+            Log.d("SavedFragment", "Tips loaded: " + (places != null ? places.size() : 0));
             tipsAdapter.setPlaces(places);
             updateEmptyView(places, emptyTips, tipsRecyclerView);
         });

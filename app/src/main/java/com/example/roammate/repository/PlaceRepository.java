@@ -225,6 +225,10 @@ public class PlaceRepository {
      */
     public void savePlace(Place place) {
         SavedPlaceEntity entity = convertPlaceToEntity(place);
+
+        // Log the save operation for debugging
+        Log.d(TAG, "Saving place: " + place.getName() + ", category: " + place.getCategory() + ", ID: " + place.getPlaceId());
+
         AppDatabase.databaseWriteExecutor.execute(() -> {
             placeDao.insertPlace(entity);
         });

@@ -1,5 +1,7 @@
 package com.example.roammate.data.model;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,13 +60,42 @@ public class Place {
         this.isSaved = false;
         this.raw = props.getRaw();
 
+//        // Determine primary category from categories list
+//        if (categories != null && !categories.isEmpty()) {
+//            // Find the most specific category (usually the last one)
+//            this.category = categories.get(categories.size() - 1);
+//        } else {
+//            this.category = "uncategorized";
+//        }
         // Determine primary category from categories list
         if (categories != null && !categories.isEmpty()) {
-            // Find the most specific category (usually the last one)
-            this.category = categories.get(categories.size() - 1);
+            // Find the most appropriate category for saving/filtering
+            if (containsCategory(categories, "tourism.attraction") ||
+                    containsCategory(categories, "tourism.sights")) {
+                this.category = "tourism.attraction";
+            } else if (containsCategory(categories, "accommodation.hotel") ||
+                    containsCategory(categories, "accommodation")) {
+                this.category = "accommodation.hotel";
+            } else if (containsCategory(categories, "catering.restaurant") ||
+                    containsCategory(categories, "catering")) {
+                this.category = "catering.restaurant";
+            } else if (containsCategory(categories, "tourism.information")) {
+                this.category = "tourism.information";
+            } else if (!categories.isEmpty()) {
+                // Use the most specific category (usually the last one)
+                this.category = categories.get(categories.size() - 1);
+            } else {
+                this.category = "uncategorized";
+            }
         } else {
             this.category = "uncategorized";
         }
+
+        // Log the category assignment
+        Log.d("Place", "Assigned category: " + this.category + " from categories: " + categories);
+
+//        // Parse category-specific fields
+//        parseAdditionalFields();
 
         // Set a placeholder rating (Geoapify doesn't provide ratings)
         this.rating = (float) (3.0 + Math.random() * 2.0); // Random rating between 3 and 5
@@ -340,6 +371,22 @@ public class Place {
 
 
     // Helper methods
+
+    /**
+     * Helper method to check if categories list contains a specific category
+     */
+    private boolean containsCategory(List<String> categories, String categoryToFind) {
+        if (categories == null) return false;
+
+        for (String category : categories) {
+            if (category.equals(categoryToFind) || category.startsWith(categoryToFind)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
     public String getCategoryDisplayName() {
         if (category == null) return "Place";

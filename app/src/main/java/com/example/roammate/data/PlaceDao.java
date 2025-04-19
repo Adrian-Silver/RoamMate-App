@@ -36,11 +36,18 @@ public interface PlaceDao {
     @Query("SELECT * FROM saved_places")
     LiveData<List<SavedPlaceEntity>> getAllSavedPlaces();
 
+//    /**
+//     * Get saved places by category
+//     */
+//    @Query("SELECT * FROM saved_places WHERE category LIKE '%' || :category || '%'")
+//    LiveData<List<SavedPlaceEntity>> getPlacesByCategory(String category);
+
     /**
      * Get saved places by category
+     * Using LIKE with % wildcards to match partial category strings
      */
-    @Query("SELECT * FROM saved_places WHERE category LIKE '%' || :category || '%'")
-    LiveData<List<SavedPlaceEntity>> getPlacesByCategory(String category);
+    @Query("SELECT * FROM saved_places WHERE category LIKE '%' || :categoryPattern || '%'")
+    LiveData<List<SavedPlaceEntity>> getPlacesByCategory(String categoryPattern);
 
     /**
      * Get a specific saved place by ID
