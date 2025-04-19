@@ -34,6 +34,8 @@ public class Place {
     private String cuisine;
     private Map<String, Object> facilities;
     private Map<String, Object> raw;
+    private String state;
+    private String county;
 
     // Constructor for creating a Place object from a Geoapify Feature
     public Place(Feature feature) {
@@ -133,7 +135,24 @@ public class Place {
         }
     }
 
-    // Constructor for creating a Place from a database entity
+//    // Constructor that can be used for geocoding results
+//    public Place(String id, String name, String category, String address,
+//                 double latitude, double longitude, String imageUrl,
+//                 float rating, boolean isSaved, String placeId) {
+//        this.id = id;
+//        this.name = name;
+//        this.category = category;
+//        this.address = address;
+//        this.latitude = latitude;
+//        this.longitude = longitude;
+//        this.imageUrl = imageUrl;
+//        this.rating = rating;
+//        this.isSaved = isSaved;
+//        this.placeId = placeId;
+//    }
+
+
+    // Constructor for creating a Place from a database entity, also use for Geocoding results
     public Place(String id, String name, String category, String address,
                  double latitude, double longitude, String imageUrl,
                  float rating, boolean isSaved, String placeId) {
@@ -298,6 +317,28 @@ public class Place {
         return raw;
     }
 
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
+    }
+
+    public void setFormattedAddress(String formattedAddress) {
+        this.formattedAddress = formattedAddress;
+    }
+
+
+
     // Helper methods
 
     public String getCategoryDisplayName() {
@@ -343,6 +384,10 @@ public class Place {
             return address.substring(0, address.indexOf(","));
         }
         return address;
+    }
+
+    public String getState() {
+        return state;
     }
 }
 

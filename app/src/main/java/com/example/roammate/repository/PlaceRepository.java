@@ -14,8 +14,10 @@ import com.example.roammate.data.SavedPlaceEntity;
 import com.example.roammate.data.model.GeoapifyResponse;
 import com.example.roammate.data.model.Place;
 import com.example.roammate.data.model.Feature;
+import com.example.roammate.data.model.geocode.GeocodeResponse;
 import com.example.roammate.util.Resource;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -175,13 +177,35 @@ public class PlaceRepository {
                     .enqueue(new Callback<GeoapifyResponse>() {
                         @Override
                         public void onResponse(Call<GeoapifyResponse> call, Response<GeoapifyResponse> response) {
-                            if (response.isSuccessful() && response.body() != null &&
-                                    !response.body().getFeatures().isEmpty()) {
-                                Place place = new Place(response.body().getFeatures().get(0));
-                                result.postValue(Resource.success(place));
-                            } else {
-                                result.postValue(Resource.error(
-                                        "Error code: " + response.code(), null));
+//                            if (response.isSuccessful() && response.body() != null &&
+//                                    !response.body().getFeatures().isEmpty()) {
+//                                Place place = new Place(response.body().getFeatures().get(0));
+//                                result.postValue(Resource.success(place));
+//                            } else {
+//                                result.postValue(Resource.error(
+//                                        "Error code: " + response.code(), null));
+//                            }
+                            try {
+                                if (response.isSuccessful() && response.body() != null &&
+                                        response.body().getFeatures() != null &&
+                                        !response.body().getFeatures().isEmpty()) {
+                                    Place place = new Place(response.body().getFeatures().get(0));
+                                    result.postValue(Resource.success(place));
+                                } else {
+                                    String errorMsg = "Error code: " + response.code();
+                                    try {
+                                        if (response.errorBody() != null) {
+                                            errorMsg += " - " + response.errorBody().string();
+                                        }
+                                    } catch (IOException e) {
+                                        Log.e(TAG, "Error reading error body", e);
+                                    }
+                                    result.postValue(Resource.error(errorMsg, null));
+                                }
+                            } catch (Exception e) {
+                                // Catch any parsing exceptions
+                                Log.e(TAG, "Error parsing place details", e);
+                                result.postValue(Resource.error("Error parsing place details: " + e.getMessage(), null));
                             }
                         }
 
@@ -294,5 +318,118 @@ public class PlaceRepository {
                 entity.getPlaceId()
         );
         return place;
+    }
+
+    /**
+     * Search for places by name (cities, regions, etc.)
+     * @param name The name to search for
+     * @param limit Maximum number of results
+     * @return LiveData containing search results
+     */
+    public LiveData<Resource<List<Place>>> searchPlacesByName(String name, int limit) {
+        MutableLiveData<Resource<List<Place>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+
+        // Use the format=json parameter as shown in the example
+        apiService.searchPlacesByName(name, "json", limit, apiKey)
+                .enqueue(new Callback<GeocodeResponse>() {
+                    @Override
+                    public void onResponse(Call<GeocodeResponse> call, Response<GeocodeResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().getResults() != null) {
+                            List<Place> places = convertGeocodingResultsToPlaces(response.body().getResults());
+                            result.postValue(Resource.success(places));
+                        } else {
+                            String errorMsg = "Error code: " + response.code();
+                            try {
+                                if (response.errorBody() != null) {
+                                    errorMsg += " - " + response.errorBody().string();
+                                }
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error reading error body", e);
+                            }
+                            result.postValue(Resource.error(errorMsg, null));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GeocodeResponse> call, Throwable t) {
+                        result.postValue(Resource.error(t.getMessage(), null));
+                        Log.e(TAG, "API call failed", t);
+                    }
+                });
+
+        return result;
+    }
+
+    /**
+     * Convert geocoding results to Place objects
+     */
+    private List<Place> convertGeocodingResultsToPlaces(List<GeocodeResponse.GeocodingResult> results) {
+        List<Place> places = new ArrayList<>();
+
+        for (GeocodeResponse.GeocodingResult result : results) {
+            // Create a Place object
+            Place place = new Place(
+                    result.getPlaceId(),
+                    result.getCity() != null ? result.getCity() : result.getAddressLine1(),
+                    result.getCategory(),
+                    result.getFormatted(),
+                    result.getLatitude(),
+                    result.getLongitude(),
+                    null, // No image URL from geocoding
+                    4.0f,  // Default rating since not provided
+                    false, // Not saved by default
+                    result.getPlaceId()
+            );
+
+            // Set additional fields
+            place.setCity(result.getCity());
+            place.setCountry(result.getCountry());
+            place.setState(result.getState());
+            place.setCounty(result.getCounty());
+            place.setFormattedAddress(result.getFormatted());
+
+            places.add(place);
+        }
+
+        return places;
+    }
+
+
+    /**
+     * Search for POIs within a specific place
+     * @param placeId The ID of the place to search within
+     * @param categories Categories to filter by (comma-separated)
+     * @param limit Maximum number of results
+     * @return LiveData containing search results
+     */
+    public LiveData<Resource<List<Place>>> searchPOIsInPlace(String placeId, String categories, int limit) {
+        MutableLiveData<Resource<List<Place>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+
+        // Create the filter parameter for the API call
+        String filter = "place:" + placeId;
+
+        apiService.searchPOIsInPlace(categories, filter, limit, apiKey)
+                .enqueue(new Callback<GeoapifyResponse>() {
+                    @Override
+                    public void onResponse(Call<GeoapifyResponse> call, Response<GeoapifyResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Place> places = convertFeaturesToPlaces(response.body().getFeatures());
+                            result.postValue(Resource.success(places));
+                        } else {
+                            result.postValue(Resource.error(
+                                    "Error code: " + response.code(), null));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GeoapifyResponse> call, Throwable t) {
+                        result.postValue(Resource.error(t.getMessage(), null));
+                        Log.e(TAG, "API call failed", t);
+                    }
+                });
+
+        return result;
     }
 }

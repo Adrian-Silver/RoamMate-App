@@ -1,5 +1,8 @@
 package com.example.roammate.data.api;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -28,10 +31,15 @@ public class ApiClient {
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
             httpClient.addInterceptor(logging);
 
+            // Create a custom Gson instance that can handle complex geometry
+            Gson gson = new GsonBuilder()
+                    .setLenient() // Be lenient with malformed JSON
+                    .create();
+
             // Create Retrofit instance
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
                     .client(httpClient.build())
                     .build();
         }

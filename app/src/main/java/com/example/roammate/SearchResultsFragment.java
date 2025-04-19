@@ -208,9 +208,10 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
             // Refresh results with the same parameters
             if (currentPlaceId != null) {
                 performSearchByPlaceId(currentPlaceId);
-            } else if (!currentQuery.isEmpty()) {
-                performSearchByText(currentQuery);
             }
+//            else if (!currentQuery.isEmpty()) {
+//                performSearchByText(currentQuery);
+//            }
         });
 
         return root;
@@ -225,7 +226,7 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
         }
 
         currentPlaceId = placeId;
-        currentQuery = "";
+//        currentQuery = "";
 
         // Show loading state
         showLoading();
@@ -238,34 +239,63 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
                 .observe(getViewLifecycleOwner(), this::processSearchResult);
     }
 
+
+
+//    /**
+//     * Perform search using text query
+//     */
+//    public void performSearchByText(String query) {
+//        if (query.isEmpty()) {
+//            return;
+//        }
+//
+//        currentQuery = query;
+//        currentPlaceId = null;
+//
+//        // Show loading state
+//        showLoading();
+//
+//        // Here we could use a text-based search API
+//        // For simplicity, we'll just show a message that place ID is needed
+//        // In a real app, you would implement a text search here
+//
+//        // Simulate search delay
+//        getView().postDelayed(() -> {
+//            hideLoading();
+//            showEmptyState("Please select a location from the suggestions");
+//            Toast.makeText(getContext(), "Select a location for better results", Toast.LENGTH_SHORT).show();
+//        }, 1000);
+//    }
+
+//    /**
+//     * Process API response
+//     */
+//    private void processSearchResult(Resource<List<Place>> resource) {
+//        hideLoading();
+//
+//        switch (resource.status) {
+//            case SUCCESS:
+//                if (resource.data != null && !resource.data.isEmpty()) {
+//                    adapter.setPlaces(resource.data);
+//                    showResults();
+//                } else {
+//                    showEmptyState("No places found");
+//                }
+//                break;
+//
+//            case ERROR:
+//                showEmptyState("Error: " + resource.message);
+//                Toast.makeText(getContext(), "Error: " + resource.message, Toast.LENGTH_SHORT).show();
+//                break;
+//
+//            case LOADING:
+//                showLoading();
+//                break;
+//        }
+//    }
+
     /**
-     * Perform search using text query
-     */
-    public void performSearchByText(String query) {
-        if (query.isEmpty()) {
-            return;
-        }
-
-        currentQuery = query;
-        currentPlaceId = null;
-
-        // Show loading state
-        showLoading();
-
-        // Here we could use a text-based search API
-        // For simplicity, we'll just show a message that place ID is needed
-        // In a real app, you would implement a text search here
-
-        // Simulate search delay
-        getView().postDelayed(() -> {
-            hideLoading();
-            showEmptyState("Please select a location from the suggestions");
-            Toast.makeText(getContext(), "Select a location for better results", Toast.LENGTH_SHORT).show();
-        }, 1000);
-    }
-
-    /**
-     * Process API response
+            * Process API response
      */
     private void processSearchResult(Resource<List<Place>> resource) {
         hideLoading();
@@ -276,7 +306,7 @@ public class SearchResultsFragment extends Fragment implements PlaceAdapter.OnPl
                     adapter.setPlaces(resource.data);
                     showResults();
                 } else {
-                    showEmptyState("No places found");
+                    showEmptyState("No places found in this category");
                 }
                 break;
 

@@ -55,6 +55,20 @@ public class PlaceViewModel extends AndroidViewModel {
     }
 
     /**
+     * Search for places by name (cities, regions, etc.)
+     */
+    public LiveData<Resource<List<Place>>> searchPlacesByName(String name, int limit) {
+        return repository.searchPlacesByName(name, limit);
+    }
+
+    /**
+     * Search for POIs within a specific place
+     */
+    public LiveData<Resource<List<Place>>> searchPOIsInPlace(String placeId, String categories, int limit) {
+        return repository.searchPOIsInPlace(placeId, categories, limit);
+    }
+
+    /**
      * Save a place
      */
     public void savePlace(Place place) {
